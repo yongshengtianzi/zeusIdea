@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.expbase.dao.ExpBaseDao">
+
+    <sql id="expBaseColumns">
+        a.exp_id as expId,
+        TO_CHAR(a.exp_time, 'YYYY/MM/DD') as expDate,
+        TO_CHAR(a.exp_time, 'HH24:MI') as expTime,
+        a.exp_type as expType,
+        a.exp_money as expMoney,
+        a.exp_dis_money as expDisMoney,
+        a.exp_source as expSource,
+        a.exp_mark as expMark,
+        a.exp_user_no as expUserNo,
+        a.operator_date as operationDate,
+        a.operator_user as operatorUser
+    </sql>
+    <sql id="expBaseJoins">
+    </sql>
+
+    <select id="findList" parameterType="zeus.idea.expbase.entity.ExpBaseEntity" resultType="zeus.idea.expbase.entity.ExpBaseEntity">
+        SELECT
+        <include refid="expBaseColumns"/>
+        FROM mg.te_expenditure A
+        <include refid="expBaseJoins"/>
+        <where>
+            <if test="ee.expType != null and ee.expType != ''">
+                AND a.exp_type = #{ee.expType}
+            </if>
+            <if test="ee.expDateStart != null and ee.expDateStart != ''">
+                AND a.exp_time &gt;= TO_DATE(#{ee.expDateStart}, 'YYYY-MM-DD')
+            </if>
+            <if test="ee.expDateEnd != null and ee.expDateEnd != ''">
+                AND a.exp_time &lt;= TO_DATE(#{ee.expDateEnd}, 'YYYY-MM-DD')
+            </if>
+            <if test="ee.expUserNo != null and ee.expUserNo != ''">
+                AND a.exp_user_no = #{ee.expUserNo}
+            </if>
+        </where>
+        ORDER BY a.exp_time DESC, to_number(a.exp_no, '9999999999') ASC
+        LIMIT ${ee.length} offset (${ee.start} - 1) * ${ee.length}
+    </select>
+    <select id="findListCount" parameterType="zeus.idea.expbase.entity.ExpBaseEntity" resultType="java.lang.Integer">
+        SELECT
+        COUNT(1)
+        FROM mg.te_expenditure A
+        <include refid="expBaseJoins"/>
+        <where>
+            <if test="ee.expType != null and ee.expType != ''">
+                AND a.exp_type = #{ee.expType}
+            </if>
+            <if test="ee.expDateStart != null and ee.expDateStart != ''">
+                AND a.exp_time &gt;= TO_DATE(#{ee.expDateStart}, 'YYYY-MM-DD')
+            </if>
+            <if test="ee.expDateEnd != null and ee.expDateEnd != ''">
+                AND a.exp_time &lt;= TO_DATE(#{ee.expDateEnd}, 'YYYY-MM-DD')
+            </if>
+            <if test="ee.expUserNo != null and ee.expUserNo != ''">
+                AND a.exp_user_no = #{ee.expUserNo}
+            </if>
+        </where>
+    </select>
+
+    <select id="sjQuery" parameterType="zeus.idea.expbase.entity.ExpBaseEntity" resultType="zeus.idea.expbase.entity.ExpBaseEntity">
+        SELECT
+        <include refid="expBaseColumns"/>
+        FROM mg.te_expenditure A
+        <include refid="expBaseJoins"/>
+        <where>
+            <if test="ee.expType != null and ee.expType != ''">
+                AND a.exp_type = #{ee.expType}
+            </if>
+            <if test="ee.expDateStart != null and ee.expDateStart != ''">
+                AND TO_CHAR(a.exp_time, 'YYYY-MM-DD') &gt;= #{ee.expDateStart}
+            </if>
+            <if test="ee.expDateEnd != null and ee.expDateEnd != ''">
+                AND TO_CHAR(a.exp_time, 'YYYY-MM-DD') &lt;= #{ee.expDateEnd}
+            </if>
+            <if test="ee.expUserNo != null and ee.expUserNo != ''">
+                AND a.exp_user_no = #{ee.expUserNo}
+            </if>
+        </where>
+        ORDER BY a.exp_time DESC, to_number(a.exp_no, '9999999999') ASC
+    </select>
+
+    <select id="getSEQ" resultType="String">
+        SELECT nextval('mg.seq_exp_money'::regclass) AS seq
+    </select>
+
+    <insert id="saveExp" parameterType="zeus.idea.expbase.entity.ExpBaseEntity">
+        INSERT INTO mg.te_expenditure(exp_id,
+            exp_no,
+            exp_time,
+            exp_type,
+            exp_money,
+            exp_dis_money,
+            exp_source,
+            exp_mark,
+            exp_user_no,
+            OPERATOR_USER)
+        VALUES (#{ee.expId},
+            #{ee.expNo},
+            to_timestamp(#{ee.expTime}, 'YYYY-MM-DD HH24:MI'),
+            #{ee.expType},
+            TO_NUMBER(#{ee.expMoney}, 'FM9999999.0000'),
+            TO_NUMBER(#{ee.expDisMoney}, 'FM9999999.0000'),
+            #{ee.expSource},
+            #{ee.expMark},
+            #{ee.expUserNo},
+            #{ee.operatorUser})
+    </insert>
+
+</mapper>

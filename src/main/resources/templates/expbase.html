@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <!-- 包含头部信息用于适应不同设备 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 包含 bootstrap 样式表 -->
+    <!-- <link rel="stylesheet" th:href="@{/css/bootstrap4.0/bootstrap.min.css}"></link> -->
+    <link rel="stylesheet" th:href="@{/css/zeus/zeus-wang1.0.css}"></link>
+    <script th:src="@{/js/zeus/zeus-wang1.0.js}"></script>
+    <!-- Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:300,400' rel='stylesheet' type='text/css' />
+    <link href='http://fonts.googleapis.com/css?family=Lato:300,400,700,900' rel='stylesheet' type='text/css' />
+    <!-- CSS Libs -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/bootstrap.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/font-awesome.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/animate.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/bootstrap-switch.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/checkbox3.min.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/dataTables.bootstrap.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/select2.min.css}" />
+    <!-- CSS App -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/own/style.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/own/themes/flat-blue.css}" />
+
+    <script type="text/javascript" src="../js/shou/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/shou/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/shou/Chart.min.js"></script>
+    <script type="text/javascript" src="../js/shou/bootstrap-switch.min.js"></script>
+    <script type="text/javascript" src="../js/shou/jquery.matchHeight-min.js"></script>
+    <script type="text/javascript" src="../js/shou/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/shou/select2.full.min.js"></script>
+    <script type="text/javascript" src="../js/shou/ace/ace.js"></script>
+    <script type="text/javascript" src="../js/shou/ace/mode-html.js"></script>
+    <script type="text/javascript" src="../js/shou/ace/theme-github.js"></script>
+    <!-- Javascript -->
+    <script type="text/javascript" src="../js/shou/own/app.js"></script>
+    <script type="text/javascript" src="../js/shou/own/index.js"></script>
+
+    <!-- DataTables相关依赖 -->
+    <link rel="stylesheet" type="text/css" th:href="@{/css/shou/jquery.dataTables.min.css}" />
+    <script type="text/javascript" src="../js/shou/jquery.dataTables.min.js"></script> <!-- 再加一个jQuery -->
+
+</head>
+<body>
+    <!-- <span th:text="${aaa}"></span> -->
+    <input type="hidden" name="expId" id="expId" th:value="*{expId}" />
+    <div class="container" style="padding-left: 0px;padding-right: 0px;">
+        <form class="form-inline" id="form_query" th:action="@{/zeus/expinit}" th:object="${entity}"  method="post">
+            <div class="row">
+                <div class="col-xs-12" style="padding-left: 0px;padding-right: 0px;">
+                    <div class="card" id="cz-form-id">
+                        <div class="card-header">
+                            <div class="col-xs-12">
+                                <div class="card">
+                                    <div class="card-body" style="padding: 0px;">
+                                        <div class="form-group">
+                                            <label for="expDateStart">花费日期：</label>
+                                            <input type="text" readonly="readonly" class="form-control" id="expDateStart" name="expDateStart" th:value="*{expDateStart}"  placeholder="起始日期" onclick="zeus.date(this, 'cz-form-id')" />
+                                            <input type="text" readonly="readonly" class="form-control" id="expDateEnd" name="expDateEnd" th:value="*{expDateEnd}"  placeholder="截止日期" onclick="zeus.date(this, 'cz-form-id')" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="expType">花销分类：</label>
+                                            <select class="form-control" id="expType" name="expType">
+                                                <option value=""></option>
+                                                <option th:each="expEvery:${expTypeList}" th:value="${expEvery.KEY}" th:text="${expEvery.NAME}"></option>
+                                            </select>
+                                        </div>
+                                        <button id="zeus-btn-cx-1" type="button" class="btn btn-default">查询</button>
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-editexp">
+                                            新增
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding: 0px;padding-top: 8px;">
+                            <table id="table-zeus-1" class="datatable table table-striped table-hover" cellspacing="0" width="100%">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th>序号</th>
+                                    <th>日期</th>
+                                    <th>时间</th>
+                                    <th>花销分类</th>
+                                    <th>金额</th>
+                                    <th>优惠金额</th>
+                                    <th>支出来源</th>
+                                    <th>备注</th>
+                                    <th>操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- <tr th:each="prod : ${findList}">
+                                        <td th:text="${prod.expId}"></td>
+                                        <td th:text="${prod.expDate}"></td>
+                                        <td th:text="${prod.expTime}"></td>
+                                        <td th:text="${prod.expType}"></td>
+                                        <td th:text="${prod.expMoney}"></td>
+                                        <td th:text="${prod.expDisMoney}"></td>
+                                        <td th:text="${prod.expSource}"></td>
+                                        <td th:text="${prod.expMark}"></td>
+                                        <td>
+                                            <a th:href="@{'/kfjwdw/updatehtml?dwm='+${prod.expId}}">更新</a>|
+                                            <a th:href="@{'/kfjwdw/delete?dwm='+${prod.expId}}">删除</a>
+                                        </td>
+                                    </tr> -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="modal fade" id="modal-editexp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content" id="cz-dialog-id">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">新增花费记录</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-inline" id="form_edit" action="" method="post">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <div class="form-group" style="position: relative;">
+                                        <label for="expDate">花费日期：</label>
+                                        <input type="text" readonly="readonly" class="form-control" id="expDate" name="expDate" th:value="*{expDate}"  placeholder="花费日期" onclick="zeus.date(this, 'cz-dialog-id')" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label for="expTime">花费时间：</label>
+                                        <input type="text" class="form-control" id="expTime" name="expTime" th:value="*{expTime}"  placeholder="花费时间" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <label for="expType">花销分类：</label>
+                                    <select id="expType" name="expType">
+                                        <option value=""></option>
+                                        <option th:each="expEvery:${expTypeList}" th:value="${expEvery.KEY}" th:text="${expEvery.NAME}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-xs-6">
+                                    <label for="expSource">花销来源：</label>
+                                    <select class="form-control" id="expSource" name="expSource">
+                                        <option value=""></option>
+                                        <option th:each="expSource:${expSourceList}" th:value="${expSource.KEY}" th:text="${expSource.NAME}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label for="expTime">花销金额：</label>
+                                        <input type="text" class="form-control" id="expMoney" name="expMoney" th:value="*{expMoney}"  placeholder="花销金额" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label for="expTime">优惠金额：</label>
+                                        <input type="text" class="form-control" id="expDisMoney" name="expDisMoney" th:value="*{expDisMoney}"  placeholder="优惠金额" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <label for="expTime">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;备注：</label>
+                                    <textarea class="form-control" style="width: 496px;" id="expMark" name="expMark" th:value="*{expMark}"  placeholder="备注"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" id="btn-saveExp-id">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $(document).bind("click", function () {
+        zeus.removeTag("ym-datetag-id");
+    });
+    /*Javascript代码片段*/
+    var t = $('#table-zeus-1').DataTable({
+        "processing": true,
+        "serverSide": true,
+        ajax: {
+            //data: $('#form_query').serialize(),
+            url: "/zeus/expajax?" + $('#form_query').serialize(), //指定数据源
+            dataSrc: 'data'
+        },
+        pageLength: 10, //每页显示三条数据
+        columns: [{"data": "expId"},
+            {"data": "expDate"},
+            {"data": "expTime"},
+            {"data": "expType"},
+            {"data": "expMoney"},
+            {"data": "expDisMoney"},
+            {"data": "expSource"},
+            {"data": "expMark"},
+            {
+                "data": null //此列不绑定数据源，用来显示序号
+            }],
+        "columnDefs": [{
+            // "visible": false,
+            //"targets": 0
+        },
+            {
+                "render": function(data, type, row, meta) {
+                    //渲染 把数据源中的标题和url组成超链接
+                    return '<a href="' + data + '" target="_blank">' + row.expId + '</a>';
+                },
+                "targets": 8 //指定是第三列
+            }],
+        "language": {
+            "lengthMenu": "_MENU_ 条记录每页",
+            "zeroRecords": "没有找到记录",
+            "info": "第 _PAGE_ 页 ( 总共 _PAGES_ 页 )",
+            "infoEmpty": "无记录",
+            "infoFiltered": "(从 _MAX_ 条记录过滤)",
+            "paginate": {
+                "previous": "上一页",
+                "next": "下一页"
+            },
+            "search":"搜索"
+        }
+    });
+    //更换数据源（相同格式，但是数据内容不同）
+    $("#zeus-btn-cx-1").click(function() {
+        //alert("是我啊");
+        //t.ajax.load();
+        //t.ajax.reload();
+        //t.draw(false);
+        t.ajax.url("/zeus/expajax?" + $('#form_query').serialize()).load();
+    });
+
+    $("#btn-saveExp-id").bind("click", saveExp);
+</script>
+</html>

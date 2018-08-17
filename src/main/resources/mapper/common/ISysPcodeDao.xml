@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.common.dao.ISysPcodeDao">
+
+    <sql id="pcodeColumns">
+        T."CODE_VALUE" as "key",
+        T."CODE_NAME" as "value"
+    </sql>
+
+    <select id="pCodeList" parameterType="string" resultType="Map">
+        SELECT
+        <include refid="pcodeColumns"/>
+        FROM tz_common.P_CODE T
+        <where>
+            T."CODE_TYPE" = #{codeType}
+        </where>
+    </select>
+
+    <select id="showName" parameterType="string" resultType="string">
+        SELECT
+          T."CODE_NAME" as "name"
+        FROM tz_common.P_CODE T
+        <where>
+            T."CODE_TYPE" = #{codeType} AND T."CODE_VALUE" = #{key}
+        </where>
+    </select>
+
+</mapper>
