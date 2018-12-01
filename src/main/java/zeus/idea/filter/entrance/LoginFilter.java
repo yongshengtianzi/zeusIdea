@@ -41,21 +41,21 @@ public class LoginFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         excludedUris = filterConfig.getInitParameter("excludedUri").split(",");
-        System.out.print("过滤执行---------1");
+        logger.debug("过滤执行---------1");
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        logger.info("用户是否登陆验证：-----开始-----");
+        logger.debug("用户是否登陆验证：-----开始-----");
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String uri = request.getServletPath();
-        logger.info("用户的uri：" + uri);
+        logger.debug("用户的uri：" + uri);
         if (isExcludedUri(uri)){
             filterChain.doFilter(request, response);
-            logger.info("用户是否登陆验证结果：-----例外-----");
+            logger.debug("用户是否登陆验证结果：-----例外-----");
         } else {
-            logger.info("用户是否登陆验证结果：-----验证用户是否登陆-----");
+            logger.debug("用户是否登陆验证结果：-----验证用户是否登陆-----");
             String token = request.getHeader("token");
             UserEHCacheUtil ueu = new UserEHCacheUtil(cacheCacheManager);
             if (token == null || "".equals(token) || ueu.getCache(token) == null ) {
@@ -82,12 +82,12 @@ public class LoginFilter implements Filter {
                 filterChain.doFilter(request, response);
             }
         }
-        logger.info("用户是否登陆验证：-----结束-----");
+        logger.debug("用户是否登陆验证：-----结束-----");
     }
 
     @Override
     public void destroy() {
-        System.out.print("过滤执行---------3");
+        logger.debug("过滤执行---------3");
     }
 
     /**
