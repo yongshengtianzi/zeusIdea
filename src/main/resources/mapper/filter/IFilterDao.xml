@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.filter.dao.IFilterDao">
+
+    <!-- 用户登录查询用户信息 -->
+    <select id="queryUserInfo" parameterType="string" resultType="zeus.idea.filter.entity.FilterUserEntity">
+        SELECT ud.user_id AS "userId",
+               ud.user_no AS "userNo",
+               ud.phone_no AS "phoneNo",
+               ud.email AS "email",
+               ud.password AS "password",
+               ud.cool_name AS "coolName",
+               ud.user_statue AS "userStatue"
+         FROM z_zeus.users_data ud
+        WHERE ud.user_is_cancel = '1'
+          AND (ud.email = #{userName}
+           OR ud.phone_no = #{userName})
+    </select>
+
+    <insert id="saveLoginRecord" parameterType="zeus.idea.sysuser.entity.UserEntity">
+        INSERT INTO z_zeus.user_login_record(record_id,
+            user_id,
+            user_no,
+            phone_no,
+            email,
+            user_ip,
+            token)
+        VALUES (#{ue.recordId},
+            to_number(#{ue.userId}, 'FM999999999999999999'),
+            #{ue.userNo},
+            #{ue.phoneNo},
+            #{ue.email},
+            #{ue.userIP},
+            #{ue.token})
+    </insert>
+
+</mapper>

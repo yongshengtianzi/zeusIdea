@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
-import zeus.idea.user.entity.UserRecordEntity;
-import zeus.idea.user.util.UserEHCacheUtil;
+import zeus.idea.sysuser.entity.UserRecordEntity;
+import zeus.idea.sysuser.util.UserEHCacheUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

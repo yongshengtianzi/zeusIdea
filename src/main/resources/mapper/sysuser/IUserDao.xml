@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.sysuser.dao.IUserDao">
+
+    <sql id="userColumns">
+        a.user_id as "userId",
+        a.user_relation_id as "userRelationId",
+        a.user_no as "userNo",
+        a.cool_name as "coolName",
+        a.phone_no as "phoneNo",
+        a.email as "email",
+        a.user_firstname as "userFirstname",
+        a.user_name as "userName",
+        a.user_gender as "userGender",
+        a.user_birthday as "userBirthday",
+        a.user_age as "userAge",
+        a.user_constellation as "userConstellation",
+        a.user_blood_type as "userBloodType",
+        a.user_birth_country as "userBirthCountry",
+        a.user_birth_province as "userBirthProvince",
+        a.user_birth_city as "userBirthCity",
+        a.user_birth_county as "userBirthCounty",
+        a.user_now_country as "userNowCountry",
+        a.user_now_province as "userNowProvince",
+        a.user_now_city as "userNowCity",
+        a.user_now_county as "userNowCounty",
+        a.user_is_cancel as "userIsCancel",
+        a.password as "password"
+    </sql>
+    <sql id="userJoins">
+    </sql>
+
+    <select id="queryUser" parameterType="zeus.idea.sysuser.entity.UserEntity" resultType="zeus.idea.sysuser.entity.UserEntity">
+        SELECT
+        <include refid="userColumns"/>
+        FROM z_zeus.users_data A
+        <include refid="userJoins"/>
+        <where>
+            a.user_is_cancel = '1'
+            <if test="ue.email != null and ue.email != ''">
+                AND a.email = #{ue.email}
+            </if>
+            <if test="ue.phoneNo != null and ue.phoneNo != ''">
+                AND a.phone_no = #{ue.phoneNo}
+            </if>
+        </where>
+    </select>
+
+    <select id="isHaveLoginRe" parameterType="String" resultType="Integer">
+        SELECT
+            COUNT(1)
+        FROM z_zeus.user_login_record A
+        WHERE a.user_no = #{userNo}
+          AND a.token = #{token}
+          AND a.login_out_time IS NULL
+    </select>
+
+    <select id="getSEQ" resultType="String">
+        SELECT nextval('z_zeus.seq_user_data'::regclass) AS seq
+    </select>
+
+    <insert id="saveUser" parameterType="zeus.idea.sysuser.entity.UserEntity">
+        INSERT INTO z_zeus.users_data(user_id,
+            user_no,
+            cool_name,
+            phone_no,
+            email,
+            password,
+            user_is_cancel)
+        VALUES (to_number(#{ue.userId}, 'FM999999999999999999'),
+            #{ue.userNo},
+            #{ue.coolName},
+            #{ue.phoneNo},
+            #{ue.email},
+            #{ue.password},
+            '1')
+    </insert>
+
+    <insert id="saveLoginRecord" parameterType="zeus.idea.sysuser.entity.UserEntity">
+        INSERT INTO z_zeus.user_login_record(record_id,
+            user_id,
+            user_no,
+            phone_no,
+            email,
+            user_ip,
+            token)
+        VALUES (#{ue.recordId},
+            to_number(#{ue.userId}, 'FM999999999999999999'),
+            #{ue.userNo},
+            #{ue.phoneNo},
+            #{ue.email},
+            #{ue.userIP},
+            #{ue.token})
+    </insert>
+
+    <update id="updateLoginRecord" parameterType="String">
+        UPDATE z_zeus.user_login_record
+           SET login_out_time = now(), login_out_type = #{loginOutType},
+               login_out_user = #{loginOutUser}, update_time = now()
+         WHERE user_no = #{userNo}
+           AND token = #{token}
+    </update>
+
+    <select id="queryUerLoginRe" parameterType="String" resultType="String">
+      SELECT T.token FROM z_zeus.user_login_record T WHERE T.user_no = #{userNo} AND T.login_out_time IS NULL;
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/9/13 11:26
+      功能说明：查询所有用户
+    -->
+    <select id="queryList" parameterType="zeus.idea.sysuser.entity.UserEntity" resultType="zeus.idea.sysuser.entity.UserEntity">
+        SELECT
+        a.user_id as "userId",
+        a.user_relation_id as "userRelationId",
+        a.user_no as "userNo",
+        a.cool_name as "coolName",
+        a.phone_no as "phoneNo",
+        a.email as "email",
+        a.user_firstname as "userFirstname",
+        a.user_name as "userName",
+        a.user_gender as "userGender",
+        a.user_birthday as "userBirthday",
+        a.user_age as "userAge",
+        a.user_constellation as "userConstellation",
+        a.user_blood_type as "userBloodType",
+        a.user_birth_country as "userBirthCountry",
+        a.user_birth_province as "userBirthProvince",
+        a.user_birth_city as "userBirthCity",
+        a.user_birth_county as "userBirthCounty",
+        a.user_now_country as "userNowCountry",
+        a.user_now_province as "userNowProvince",
+        a.user_now_city as "userNowCity",
+        a.user_now_county as "userNowCounty",
+        a.user_is_cancel as "userIsCancel"
+        FROM z_zeus.users_data A
+        <where>
+            <if test="coolName != null and coolName != ''">
+                AND a.cool_name = #{coolName}
+            </if>
+            <if test="userNo != null and userNo != ''">
+                AND a.user_no = #{userNo}
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -8,11 +8,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 import zeus.idea.common.bizc.ISysPcodeBizc;
 import zeus.idea.expbase.bizc.IExpBaseBizc;
 import zeus.idea.expbase.entity.ExpBaseEntity;
-import zeus.idea.user.entity.UserRecordEntity;
+import zeus.idea.sysuser.entity.UserRecordEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

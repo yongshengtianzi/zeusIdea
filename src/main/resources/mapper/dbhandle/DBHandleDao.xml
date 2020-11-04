@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.dbhandle.dao.DBHandleDao">
+
+    <sql id="tableColumns">
+    </sql>
+
+    <!-- 查询表字段及类型 -->
+    <select id="queryTableCols" parameterType="string" resultType="zeus.idea.dbhandle.entity.TableColEntity">
+        SELECT AA.COL_NAME AS "colName",
+               AA.COL_TYPE AS "colType",
+               AA.COL_LEN AS "colLen",
+               AA.COL_NULLABLE AS "colIsNull",
+               AA.COL_DEFAULT AS "colDefault",
+               BB."IS_KEY" AS "isKey",
+               BB.DESC AS "desc" FROM(SELECT
+           A.ORDINAL_POSITION AS COL_NUM,
+           A.COLUMN_NAME AS COL_NAME,
+           A.UDT_NAME AS COL_TYPE,
+           A.CHARACTER_MAXIMUM_LENGTH AS COL_LEN,
+           A.NUMERIC_PRECISION AS COL_PREC,
+           A.DATETIME_PRECISION AS COL_TIME_PREC,
+           A.IS_NULLABLE AS COL_NULLABLE,
+           A.COLUMN_DEFAULT AS COL_DEFAULT
+          FROM INFORMATION_SCHEMA.COLUMNS A
+         WHERE A.TABLE_SCHEMA = #{sch} AND A.TABLE_NAME = #{tableName}) AA
+        LEFT JOIN(SELECT
+           OBJSUBID,
+           CASE WHEN pg_constraint.contype = 'p' THEN 'key'ELSE NULL END "IS_KEY",
+           DESCRIPTION AS DESC
+          FROM PG_DESCRIPTION LEFT JOIN pg_constraint ON pg_constraint.CONRELID = PG_DESCRIPTION.OBJOID AND pg_constraint.conkey[1] = PG_DESCRIPTION.OBJSUBID
+         WHERE OBJOID = (SELECT RELID FROM PG_STAT_ALL_TABLES WHERE SCHEMANAME = #{sch} AND RELNAME = #{tableName})) BB
+            ON AA.COL_NUM = BB.OBJSUBID
+        ORDER BY AA.COL_NUM
+    </select>
+
+    <!-- 保存csv数据 -->
+    <insert id="saveCsvData">
+        INSERT INTO ${tableName}(
+        <foreach collection="colNames" item="item" index="indexCol" separator=",">
+            ${item}
+        </foreach>
+        ) VALUES
+        <foreach collection="datas" item="mapData" index="indexList" separator=",">
+            (
+            <foreach collection="colNames" item="item2" index="indexCol2" separator=",">
+                ${mapData[item2]}
+            </foreach>
+            )
+        </foreach>
+    </insert>
+
+    <!-- 删除csv数据 -->
+    <delete id="delCsvData">
+        DELETE FROM ${tableName} WHERE
+        EXISTS(SELECT 1 FROM unnest(ARRAY[
+        <foreach collection="keyDatas" item="item" index="indexCol" separator=",">
+            ${item}
+        </foreach>
+        ]) DTID WHERE DTID = ${colName})
+    </delete>
+
+    <!-- 删除所有数据 -->
+    <delete id="delAllData">
+        DELETE FROM ${tableName}
+    </delete>
+
+</mapper>

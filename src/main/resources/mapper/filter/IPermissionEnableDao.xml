@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.filter.dao.IPermissionEnableDao">
+
+    <!-- 查询权限关系数据，供服务启动时使用 -->
+    <select id="queryPermRelation" resultType="zeus.idea.filter.entity.PermissionEnableEntity">
+        SELECT pua.url_href AS "urlHref",
+               (SELECT string_agg(pra.en_name, ',')
+                  FROM z_zeus.permission_relation_role_url prru,
+                       z_zeus.permission_role_all pra
+                 WHERE pua.url_id = prru.url_id
+                   AND prru.role_id = pra.role_id
+                   AND prru.del_flag = '1'
+                   AND pra.del_flag = '1') AS "enName"
+          FROM z_zeus.permission_url_all pua
+         WHERE pua.del_flag = '1'
+           AND pua.url_href IS NOT NULL
+        ORDER BY pua.sort ASC
+    </select>
+
+    <!-- 查询用户角色权限关系，供用户登录时使用 -->
+    <select id="queryUserRelation" parameterType="string" resultType="zeus.idea.filter.entity.UserRoleEntity">
+        SELECT ud.user_no AS "userNo",
+               prur.relation_type AS "relationType",
+               pra.en_name AS "enName"
+          FROM z_zeus.users_data ud,
+               z_zeus.permission_relation_user_role prur,
+               z_zeus.permission_role_all pra
+         WHERE ud.user_id = prur.user_id
+           AND prur.role_id = pra.role_id
+           AND ud.user_no = #{userNo}
+           AND ud.user_is_cancel = '1'
+           AND prur.del_flag = '1'
+           AND pra.del_flag = '1'
+    </select>
+
+    <!-- 查询用户信息 -->
+    <select id="queryUserInfo" parameterType="string" resultType="zeus.idea.filter.entity.FilterUserEntity">
+        SELECT ud.user_no AS "userNo",
+               ud.phone_no AS "phoneNo",
+               ud.email AS "email",
+               ud.password AS "password",
+               ud.cool_name AS "coolName",
+               ud.user_statue AS "userStatue",
+               ud.user_id AS "userId"
+         FROM z_zeus.users_data ud
+        WHERE ud.user_is_cancel = '1'
+          AND (ud.email = #{userName}
+           OR ud.phone_no = #{userName})
+    </select>
+
+</mapper>

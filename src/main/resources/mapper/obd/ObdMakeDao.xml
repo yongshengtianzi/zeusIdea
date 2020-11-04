@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.obd.dao.ObdMakeDao">
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/3 11:22
+      功能说明：查询车辆信息
+    -->
+    <select id="queryObdCar" parameterType="string" resultType="zeus.idea.obd.entity.ObdCarEntity">
+        SELECT
+            t.car_num as "carNum",
+            t.car_jia as "carJia",
+            t.car_people as "carPeople",
+            t.car_phone_num as "carPhoneNum",
+            t.car_num_type as "carNumType",
+            t.car_type as "carType",
+            t.manufacture_date as "manufactureDate",
+            t.register as "register",
+            t.people_type as "peopleType",
+            t.car_out_level as "carOutLevel",
+            t.car_qux as "carQux",
+            t.car_engine_type as "carEngineType",
+            t.car_drive as "carDrive",
+            t.car_brand as "carBrand",
+            t.car_vehicle_type as "carVehicleType",
+            t.car_manufacturer as "carManufacturer",
+            t.car_pail as "carPail",
+            t.car_kg as "carKg",
+            t.car_niaos as "carNiaos",
+            t.car_fent as "carFent",
+            t.car_gongl as "carGongl",
+            t.car_yongt as "carYongt",
+            t.car_max_niu as "carMaxNiu",
+            t.car_niu as "carNiu",
+            t.car_ranl as "carRanl",
+            t.car_fee as "carFee",
+            t.car_num_color as "carNumColor",
+            t.car_pople_num as "carPopleNum",
+            t.car_max_kg as "carMaxKg",
+            t.car_huj as "carHuj",
+            t.car_danw as "carDanw",
+            t.car_jier as "carJier",
+            t.create_time as "createTime",
+            t.create_user as "createUser",
+            t.update_time as "updateTime",
+            t.update_user as "updateUser"
+          FROM txbd.t_obd_car t
+         WHERE
+            t.car_num = #{carNum}
+        <if test="carPeople != null and carPeople != ''">
+            AND t.car_people = #{carPeople}
+        </if>
+        <if test="carJia != null and carJia != ''">
+            AND t.car_jia like '%' || #{carJia}
+        </if>
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/3 11:21
+      功能说明：保存预约信息
+    -->
+    <insert id="saveObdMake" parameterType="zeus.idea.obd.entity.ObdMakeEntity">
+        INSERT INTO txbd.t_obd_make(
+            car_num,
+            del_flag,
+            make_people,
+            phone_num,
+            qu_x,
+            an_zh_di,
+            exp_time,
+            exp_mark,
+            create_user,
+            update_user,
+            addr,
+            tel)
+        VALUES (#{ome.carNum},
+                '1',
+                #{ome.makePeople},
+                #{ome.phoneNum},
+                #{ome.quX},
+                #{ome.anZhDi},
+                to_date(#{ome.expTime}, 'YYYY-MM-DD'),
+                #{ome.expMark},
+                #{ome.createUser},
+                #{ome.updateUser},
+                #{ome.addr},
+                #{ome.tel})
+    </insert>
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/3 15:40
+      功能说明：更新车辆信息
+    -->
+    <update id="updCarInfo" parameterType="zeus.idea.obd.entity.ObdCarEntity">
+        UPDATE txbd.t_obd_car
+           SET car_people = #{oce.carPeople},
+               car_jia = #{oce.carJia},
+               car_drive = #{oce.carDrive},
+               car_vehicle_type = #{oce.carVehicleType},
+               car_brand = #{oce.carBrand},
+               car_phone_num = #{oce.carPhoneNum}
+         WHERE car_num = #{oce.carNum}
+    </update>
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/3 16:14
+      功能说明：根据车牌号查询预约信息
+    -->
+    <select id="queryMakeInfo" parameterType="string" resultType="zeus.idea.obd.entity.ObdMakeEntity">
+        SELECT
+            t.car_num as "carNum",
+            t.del_flag as "delFlag",
+            t.make_people as "makePeople",
+            t.phone_num as "phoneNum",
+            t.qu_x as "quX",
+            t.an_zh_di as "anZhDi",
+            to_char(t.exp_time, 'YYYY-MM-DD') as "expTime",
+            t.exp_mark as "expMark",
+            t.create_time as "createTime",
+            t.create_user as "createUser",
+            t.update_time as "updateTime",
+            t.update_user as "updateUser",
+            t.addr as "addr",
+            t.tel as "tel"
+       FROM txbd.t_obd_make t
+      WHERE t.del_flag = '1'
+        <if test="carNum != null and carNum != ''">
+            AND t.car_num = #{carNum}
+        </if>
+        <if test="quX != null and quX != ''">
+            AND t.qu_x = #{quX}
+        </if>
+        <if test="expTime != null and expTime != ''">
+            AND t.exp_time = to_date(#{expTime}, 'YYYY-MM-DD')
+        </if>
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/3 16:22
+      功能说明：根据区县和日期查询可用预约数
+    -->
+    <select id="queryCunInfo" parameterType="string" resultType="zeus.idea.obd.entity.ObdCunEntity">
+        SELECT
+            t.cun_qux as "cunQux",
+            to_char(t.cun_date, 'YYYY-MM-DD') as "cunDate",
+            t.cun_num as "cunNum"
+       FROM txbd.t_obd_cun t
+      WHERE t.cun_qux = #{cunQux}
+        <if test="cunDate != null and cunDate != ''">
+            AND t.cun_date = to_date(#{cunDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="cunDateNow != null and cunDateNow != ''">
+            AND t.cun_date &gt; to_date(#{cunDateNow}, 'YYYY-MM-DD')
+        </if>
+    </select>
+
+</mapper>
