@@ -57,7 +57,7 @@ public class ObdMakeController {
 
         LocalDateTime nowTime = LocalDateTime.now();
         int tempHour = nowTime.getHour();
-        if (tempHour <= 7 || tempHour >= 20) {
+        if (tempHour < 7 || tempHour >= 20) {
             code = "2";
             msg = "当天预约已经结束，请在7:00~20:00之间预约！";
             retMap.put("code", code);
@@ -400,7 +400,7 @@ public class ObdMakeController {
 
         LocalDateTime nowTime = LocalDateTime.now();
         int tempHour = nowTime.getHour();
-        if (tempHour <= 7 || tempHour >= 20) {
+        if (tempHour < 7 || tempHour >= 20) {
             code = "2";
             msg = "当天预约已经结束，请在7:00~20:00之间预约！";
             retMap.put("code", code);
