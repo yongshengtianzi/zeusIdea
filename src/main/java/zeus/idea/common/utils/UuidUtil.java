@@ -22,4 +22,19 @@ public class UuidUtil {
         UUID uuid= UUID.randomUUID();
         return uuid.toString();
     }
+
+    /**
+     * 方法功能说明：获取不带“-”的UUID
+     *
+     * @param
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/6 18:56
+     *
+     * 修改人:          修改日期:
+     */
+    public static String getUUIDNoLine() {
+        UUID uuid= UUID.randomUUID();
+        return uuid.toString().replaceAll("-", "");
+    }
 }

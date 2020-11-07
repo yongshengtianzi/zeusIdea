@@ -91,6 +91,46 @@
 
     <!--
       任务编号：
+      王锦阳 2020/11/6 18:49
+      功能说明：批量保存预约信息
+    -->
+    <insert id="insObdMakeAll" parameterType="list">
+        INSERT INTO txbd.t_obd_make(
+            car_num,
+            del_flag,
+            make_people,
+            phone_num,
+            qu_x,
+            an_zh_di,
+            exp_time,
+            exp_mark,
+            create_user,
+            update_user,
+            addr,
+            tel,
+            duo_flag)
+        VALUES
+        <foreach collection="lsMap" item="mapData" index="indexList" separator=",">
+            (
+            #{mapData.carNum},
+            '1',
+            #{mapData.makePeople},
+            #{mapData.phoneNum},
+            #{mapData.quX},
+            #{mapData.anZhDi},
+            to_date(#{mapData.expTime}, 'YYYY-MM-DD'),
+            #{mapData.expMark},
+            #{mapData.createUser},
+            #{mapData.updateUser},
+            #{mapData.addr},
+            #{mapData.tel},
+            #{mapData.duoFlag}
+            )
+        </foreach>
+    </insert>
+
+    <!--
+      任务编号：
       王锦阳 2020/11/3 15:40
       功能说明：更新车辆信息
     -->
@@ -101,7 +141,16 @@
                car_drive = #{oce.carDrive},
                car_vehicle_type = #{oce.carVehicleType},
                car_brand = #{oce.carBrand},
-               car_phone_num = #{oce.carPhoneNum}
+               car_phone_num = #{oce.carPhoneNum},
+               car_num_color = #{oce.carNumColor},
+               car_type = #{oce.carType},
+               car_engine_type = #{oce.carEngineType},
+               car_pople_num = #{oce.carPopleNum},
+               car_max_kg = #{oce.carMaxKg},
+               car_niaos = #{oce.carNiaos},
+               car_manufacturer = #{oce.carManufacturer},
+               car_qux = #{oce.carQux},
+               car_danw = #{oce.carDanw}
          WHERE car_num = #{oce.carNum}
     </update>
 

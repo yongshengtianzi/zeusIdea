@@ -88,4 +88,15 @@ public interface ObdMakeDao {
     List<ObdCunEntity> queryCunInfo(@Param("cunQux") String cunQux, @Param("cunDate") String cunDate,
                                     @Param("cunDateNow") String cunDateNow);
 
+    /**
+     * 方法功能说明：批量保存预约信息
+     *
+     * @param lsMap
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/6 18:49
+     *
+     * 修改人:          修改日期:
+     */
+    void insObdMakeAll(@Param("lsMap") List<ObdMakeEntity> lsMap);
 }

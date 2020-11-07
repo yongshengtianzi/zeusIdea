@@ -1,5 +1,7 @@
 package zeus.idea.obd.entity;
 
+import java.util.List;
+
 /**
  * 类名：ObdMakeEntity
  * 公司：-----智讯云-----
@@ -25,6 +27,25 @@ public class ObdMakeEntity {
     private String updateUser;//修改人，用户id
     private String addr;//地址
     private String tel;//姓名及电话
+    private String duoFlag;//批量预约标识，uuid生成
+
+    private List<ObdCarEntity> cars;//车辆信息列表
+
+    public String getDuoFlag() {
+        return duoFlag;
+    }
+
+    public void setDuoFlag(String duoFlag) {
+        this.duoFlag = duoFlag;
+    }
+
+    public List<ObdCarEntity> getCars() {
+        return cars;
+    }
+
+    public void setCars(List<ObdCarEntity> cars) {
+        this.cars = cars;
+    }
 
     public String getAddr() {
         return addr;

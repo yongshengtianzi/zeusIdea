@@ -11,6 +11,7 @@ package zeus.idea.obd.entity;
  * 修改人：           修改时间：
  */
 public class ObdCarEntity {
+    private String id;
     private String carNum;//车牌号，表主键
     private String carJia;//车架号
     private String carPeople;//车主姓名
@@ -47,6 +48,24 @@ public class ObdCarEntity {
     private String createUser;//创建人，用户id
     private String updateTime;//修改时间
     private String updateUser;//修改人，用户id
+
+    private String isMake;//1已经被预约，0未被预约
+
+    public String getIsMake() {
+        return isMake;
+    }
+
+    public void setIsMake(String isMake) {
+        this.isMake = isMake;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getCarNum() {
         return carNum;
