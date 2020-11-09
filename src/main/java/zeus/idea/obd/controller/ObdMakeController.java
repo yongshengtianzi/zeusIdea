@@ -1,6 +1,9 @@
 package zeus.idea.obd.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +15,17 @@ import zeus.idea.obd.bizc.ObdMakeBizc;
 import zeus.idea.obd.entity.ObdCarEntity;
 import zeus.idea.obd.entity.ObdCunEntity;
 import zeus.idea.obd.entity.ObdMakeEntity;
+import zeus.idea.obd.entity.ObdMakeZongEntity;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * 类名：ObdMakeController
@@ -549,6 +557,197 @@ public class ObdMakeController {
         retMap.put("code", code);
         retMap.put("msg", msg);
         return retMap;
+    }
+
+    /**
+     * 方法功能说明：查询预约数据
+     *
+     * @param paramsMap
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/8 8:26
+     *
+     * 修改人:          修改日期:
+     */
+    @RequestMapping(value = "querymakenowdate")
+    @ResponseBody
+    public Map<String, Object> queryMakeNowDate(@RequestBody Map<String, String> paramsMap) {
+        Map<String, Object> retMap = new HashMap<>();
+        String code = "1";
+        String msg = "";
+
+        String nowDate = paramsMap.get("nowDate");
+        if (StringUtils.isBlank(nowDate)) {
+            code = "2";
+            msg = "查询日期不能为空！";
+        }
+
+        if ("1".equals(code)) {
+            try {
+                List<ObdMakeZongEntity> data = obdMakeBizc.queryMakeNowDate(nowDate);
+                if (data == null || data.size() == 0) {
+                    code = "3";
+                    msg = "未查到预约信息！";
+                } else {
+                    retMap.put("data", data);//查询成功放入车辆信息
+                    msg = "查询成功";
+                }
+            } catch (Exception e) {
+                logger.error("查询预约信息异常：" + e.getMessage());
+                code = "0";
+                msg = "查询预约信息异常！";
+            }
+        }
+
+        retMap.put("code", code);
+        retMap.put("msg", msg);
+        return retMap;
+    }
+
+    /**
+     * 方法功能说明：查询字典
+     *
+     * @param paramsMap
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/8 21:27
+     *
+     * 修改人:          修改日期:
+     */
+    @RequestMapping(value = "querydict")
+    @ResponseBody
+    public Map<String, Object> queryDict(@RequestBody Map<String, String> paramsMap) {
+        Map<String, Object> retMap = new HashMap<>();
+        String code = "1";
+        String msg = "";
+
+        if ("1".equals(code)) {
+            try {
+                Map<String, Map<String, Map<String, String>>> data = obdMakeBizc.queryDict();
+                retMap.put("data", data);//查询成功放入数据字典
+                msg = "查询成功";
+            } catch (Exception e) {
+                logger.error("查询预约信息异常：" + e.getMessage());
+                code = "0";
+                msg = "查询预约信息异常！";
+            }
+        }
+
+        retMap.put("code", code);
+        retMap.put("msg", msg);
+        return retMap;
+    }
+
+    /**
+     * 方法功能说明：导出预约信息
+     *
+     * @param mapInfo
+     * @param request
+     * @param response
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/9 11:06
+     *
+     * 修改人:          修改日期:
+     */
+    @RequestMapping(value = "output")
+    @ResponseBody
+    public Map<String, Object> handleOutput(@RequestBody Map<String,String> mapInfo, HttpServletRequest request, HttpServletResponse response) {
+        Map<String,Object> resultMap = new HashMap<String, Object>();
+        String code = "1";
+        String msg = "成功";
+
+        String expTime = mapInfo.get("expTime");
+        String quX = mapInfo.get("quX");
+        String anZhDi = mapInfo.get("anZhDi");
+        String yanZh = mapInfo.get("yanZh");
+
+        if (!"杨涛".equals(yanZh)) {
+            code = "2";
+            msg = "验证失败，请确认身份后再试！";
+        }
+
+        if ("1".equals(code)) {
+            try {
+                List<String> listCol = new ArrayList<String>();
+                List<ObdMakeEntity> tempList = obdMakeBizc.handleQuery(expTime, quX, anZhDi);
+                if (tempList != null && tempList.size() > 0) {
+                    InputStream in = ObdMakeController.class.getClassLoader().getResourceAsStream("templates/other/yuYueInfo.xlsx");
+                    XSSFWorkbook wb = new XSSFWorkbook(in);
+                    XSSFSheet st = wb.getSheet("预约信息");
+                    for (int i = 0; i < st.getRow(0).getLastCellNum(); i++) {
+                        listCol.add(st.getRow(0).getCell(i).getStringCellValue());
+                    }
+                    XSSFRow tempRow = null;
+                    for (int i = 0; i < tempList.size(); i++) {
+                        tempRow = st.createRow(i + 1);
+                        for (int j = 0; j < listCol.size(); j++) {
+                            if ("车牌号".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getCarNum());
+                            } else if ("预约人".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getMakePeople());
+                            } else if ("电话".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getPhoneNum());
+                            } else if ("区县".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getQuX());
+                            } else if ("安装点".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getAnZhDi());
+                            } else if ("安装日期".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getExpTime());
+                            } else if ("备注".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getExpMark());
+                            } else if ("创建时间".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getCreateTime());
+                            } else if ("修改时间".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getUpdateTime());
+                            } else if ("地址".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getAddr());
+                            } else if ("姓名及电话".equals(listCol.get(j))) {
+                                tempRow.createCell(j).setCellValue(tempList.get(i).getTel());
+                            }
+                        }
+                    }
+                    response.reset();
+                    SimpleDateFormat sm = new SimpleDateFormat("yyyyMMddHHmmss");
+                    String rootPath = request.getContextPath();
+                    if (StringUtils.isBlank(rootPath)) {
+                        rootPath = "webapp";
+                    }
+                    String tempPath = request.getSession().getServletContext().getRealPath("");
+                    tempPath = tempPath + "file_temp/";
+                    File file = new File(tempPath);
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
+                    tempPath = tempPath + "预约信息" + sm.format(new Date()) + ".xlsx";
+                    file = new File(tempPath);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    file.createNewFile();
+                    FileOutputStream output=new FileOutputStream(file);
+                    wb.write(output);
+                    output.close();
+                    in.close();
+                    tempPath = tempPath.replace("\\", "/");
+                    tempPath = tempPath.substring(tempPath.lastIndexOf("/file_temp"));
+                    resultMap.put("path", tempPath);
+                    msg = "成功";
+                } else {
+                    code = "2";
+                    msg = "没有数据可以导出！";
+                }
+            } catch (Exception e) {
+                code = "0";
+                msg = "导出失败";
+                logger.error("导出异常：", e);
+            }
+        }
+
+        resultMap.put("code", code);
+        resultMap.put("msg", msg);
+
+        return resultMap;
     }
 
 }

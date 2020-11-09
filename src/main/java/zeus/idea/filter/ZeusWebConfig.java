@@ -128,6 +128,7 @@ public class ZeusWebConfig {
         filterChainDefinitionMap.put("/actuator/**", "anon");
         filterChainDefinitionMap.put("/index.html", "anon");
         filterChainDefinitionMap.put("/static/**", "anon");
+        filterChainDefinitionMap.put("/file_temp/**", "anon");
         //配置监听
         filterChainDefinitionMap.put("/zeus/dbhandle/init", "authc,roles[adminRole]");
 

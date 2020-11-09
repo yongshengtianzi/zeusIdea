@@ -186,6 +186,9 @@
         <if test="expTime != null and expTime != ''">
             AND t.exp_time = to_date(#{expTime}, 'YYYY-MM-DD')
         </if>
+        <if test="anZhDi != null and anZhDi != ''">
+            AND t.an_zh_di = #{anZhDi}
+        </if>
     </select>
 
     <!--
@@ -206,6 +209,44 @@
         <if test="cunDateNow != null and cunDateNow != ''">
             AND t.cun_date &gt; to_date(#{cunDateNow}, 'YYYY-MM-DD')
         </if>
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/8 8:59
+      功能说明：汇总预约数量
+    -->
+    <select id="queryMakeZong" parameterType="string" resultType="zeus.idea.obd.entity.ObdMakeZongEntity">
+        SELECT
+            t.cun_date AS "cunDate",
+            t.cun_qux AS "cunQux",
+			t.cun_num AS "cunNum",
+			TO_CHAR(mk.num, 'FM999999999') AS "num",
+			TO_CHAR(to_number(t.cun_num, 'FM99999999') - mk.num, 'FM999999999') AS "weiNum"
+         FROM txbd.t_obd_cun t,
+	          (SELECT COUNT(1) as "num",
+			          tm.qu_x
+				 FROM txbd.t_obd_make tm
+				WHERE tm.del_flag = '1'
+				  AND tm.exp_time = to_date(#{nowDate}, 'YYYY-MM-DD')
+				GROUP BY tm.qu_x) mk
+         WHERE t.cun_qux = mk.qu_x
+           AND t.cun_date = to_date(#{nowDate}, 'YYYY-MM-DD')
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/11/8 21:03
+      功能说明：查询字典
+    -->
+    <select id="queryDict" resultType="map">
+        SELECT
+            cd.qu_x as "quX",
+            cd.an_zh_di as "anZhDi",
+            cd.addr as "addr",
+            cd.tel as "tel"
+       FROM txbd.common_dict cd
+       ORDER BY cd.order_by
     </select>
 
 </mapper>

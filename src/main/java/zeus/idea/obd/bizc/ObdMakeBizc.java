@@ -8,6 +8,7 @@ import zeus.idea.obd.dao.ObdMakeDao;
 import zeus.idea.obd.entity.ObdCarEntity;
 import zeus.idea.obd.entity.ObdCunEntity;
 import zeus.idea.obd.entity.ObdMakeEntity;
+import zeus.idea.obd.entity.ObdMakeZongEntity;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -57,7 +58,7 @@ public class ObdMakeBizc {
      * 修改人:          修改日期:
      */
     public List<ObdMakeEntity> queryObdMake(String carNum) {
-        return obdMakeDao.queryMakeInfo(carNum, null, null);
+        return obdMakeDao.queryMakeInfo(carNum, null, null, null);
     }
 
     /**
@@ -95,7 +96,8 @@ public class ObdMakeBizc {
         if ("0".equals(flag)) {
             //单车预约
             //判断当前车辆是否已经预约
-            List<ObdMakeEntity> tempMakeList = obdMakeDao.queryMakeInfo(ome.getCarNum(), null, null);
+            List<ObdMakeEntity> tempMakeList = obdMakeDao.queryMakeInfo(ome.getCarNum(), null,
+                    null, null);
             if (tempMakeList.size() > 0) {
                 code = "2";
                 msg = "当前车辆已经预约安装，请勿重复预约！";
@@ -113,7 +115,7 @@ public class ObdMakeBizc {
                 retMap.put("msg", msg);
                 return retMap;
             }
-            tempMakeList = obdMakeDao.queryMakeInfo(null, ome.getQuX(), ome.getExpTime());
+            tempMakeList = obdMakeDao.queryMakeInfo(null, ome.getQuX(), ome.getExpTime(), null);
             int tempCunNum = Integer.parseInt(tempCunList.get(0).getCunNum());
             if (tempMakeList.size() >= tempCunNum) {
                 //预约已满处理
@@ -125,7 +127,7 @@ public class ObdMakeBizc {
             }
             //保存预约信息
             obdMakeDao.saveObdMake(ome);
-            msg = "预约成功！";
+            msg = "预约成功，请按照预约日期当天去安装点安装，错过后将无法安装且不可重复预约！";
             retMap.put("code", code);
             retMap.put("msg", msg);
             return retMap;
@@ -134,7 +136,7 @@ public class ObdMakeBizc {
             //判断当前车辆是否已经预约
             List<ObdMakeEntity> tempMakeList;
             for (ObdCarEntity for_entity : ome.getCars()) {
-                tempMakeList = obdMakeDao.queryMakeInfo(for_entity.getCarNum(), null, null);
+                tempMakeList = obdMakeDao.queryMakeInfo(for_entity.getCarNum(), null, null, null);
                 if (tempMakeList.size() > 0) {
                     code = "2";
                     msg = "序号为" + for_entity.getId() + "的车已经预约安装，请勿重复预约！";
@@ -155,7 +157,7 @@ public class ObdMakeBizc {
                 return retMap;
             }
 
-            tempMakeList = obdMakeDao.queryMakeInfo(null, ome.getQuX(), ome.getExpTime());
+            tempMakeList = obdMakeDao.queryMakeInfo(null, ome.getQuX(), ome.getExpTime(), null);
             int tempCunNum = Integer.parseInt(tempCunList.get(0).getCunNum());
             if (tempMakeList.size() >= tempCunNum) {
                 //预约已满处理
@@ -198,7 +200,7 @@ public class ObdMakeBizc {
             if (tempMakeEntityList.size() > 0) {
                 obdMakeDao.insObdMakeAll(tempMakeEntityList);
             }
-            msg = "预约成功！";
+            msg = "预约成功，请按照预约日期当天去安装点安装，错过后将无法安装且不可重复预约！";
             retMap.put("code", code);
             retMap.put("msg", msg);
             return retMap;
@@ -241,7 +243,7 @@ public class ObdMakeBizc {
         if (tempDataList != null && tempDataList.size() == 1) {
             //寻找该数据是否已经被预约
             ObdCarEntity entity = tempDataList.get(0);
-            List<ObdMakeEntity> tempMakeEntityList = obdMakeDao.queryMakeInfo(entity.getCarNum(), null, null);
+            List<ObdMakeEntity> tempMakeEntityList = obdMakeDao.queryMakeInfo(entity.getCarNum(), null, null, null);
             if (tempMakeEntityList != null && tempMakeEntityList.size() > 0) {
                 entity.setIsMake("1");//已经被预约
             } else {
@@ -250,6 +252,77 @@ public class ObdMakeBizc {
 
         }
         return tempDataList;
+    }
+
+    /**
+     * 方法功能说明：汇总预约数量
+     *
+     * @param nowDate
+     * @return 
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/8 9:13
+     *
+     * 修改人:          修改日期:
+     */
+    public List<ObdMakeZongEntity> queryMakeNowDate(String nowDate) {
+        return obdMakeDao.queryMakeZong(nowDate);
+    }
+
+    /**
+     * 方法功能说明：查询字典
+     *
+     * @param
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/8 21:26
+     *
+     * 修改人:          修改日期:
+     */
+    public Map<String, Map<String, Map<String, String>>> queryDict() {
+        List<Map<String, String>> tempList = obdMakeDao.queryDict();
+
+        Map<String, Map<String, Map<String, String>>> retMap = new HashMap();
+        Map<String, Map<String, String>> tempMap;
+        Map<String, String> tempMap2;
+        String tempStr = null;
+        for (Map<String, String> for_map : tempList) {
+            tempStr = for_map.get("quX");
+            tempMap = retMap.get(tempStr);
+            if (tempMap == null) {
+                tempMap = new HashMap<>();
+                tempMap2 = new HashMap<>();
+                tempMap2.put("addr", for_map.get("addr"));
+                tempMap2.put("tel", for_map.get("tel"));
+
+                tempMap.put(for_map.get("anZhDi"), tempMap2);
+
+                retMap.put(tempStr, tempMap);
+            } else {
+                tempMap2 = new HashMap<>();
+                tempMap2.put("addr", for_map.get("addr"));
+                tempMap2.put("tel", for_map.get("tel"));
+
+                tempMap.put(for_map.get("anZhDi"), tempMap2);
+            }
+        }
+
+        return retMap;
+    }
+
+    /**
+     * 方法功能说明：查询预约信息，供导出使用
+     *
+     * @param expTime
+     * @param quX
+     * @param anZhDi
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/9 10:44
+     *
+     * 修改人:          修改日期:
+     */
+    public List<ObdMakeEntity> handleQuery(String expTime, String quX, String anZhDi) {
+        return obdMakeDao.queryMakeInfo(null, quX, expTime, anZhDi);
     }
 
 }

@@ -5,8 +5,10 @@ import org.apache.ibatis.annotations.Param;
 import zeus.idea.obd.entity.ObdCarEntity;
 import zeus.idea.obd.entity.ObdCunEntity;
 import zeus.idea.obd.entity.ObdMakeEntity;
+import zeus.idea.obd.entity.ObdMakeZongEntity;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 接口名：ObdMakeDao
@@ -72,7 +74,7 @@ public interface ObdMakeDao {
      * 修改人:          修改日期:
      */
     List<ObdMakeEntity> queryMakeInfo(@Param("carNum") String carNum, @Param("quX") String quX,
-                                      @Param("expTime") String expTime);
+                                      @Param("expTime") String expTime, @Param("anZhDi") String anZhDi);
     
     /**
      * 方法功能说明：根据区县和日期查询可用预约数
@@ -99,4 +101,43 @@ public interface ObdMakeDao {
      * 修改人:          修改日期:
      */
     void insObdMakeAll(@Param("lsMap") List<ObdMakeEntity> lsMap);
+
+    /**
+     * 方法功能说明：汇总预约数量
+     *
+     * @param nowDate
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/8 9:02
+     *
+     * 修改人:          修改日期:
+     */
+    List<ObdMakeZongEntity> queryMakeZong(@Param("nowDate") String nowDate);
+
+    /**
+     * 方法功能说明：查询字典
+     *
+     * @param
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/8 21:04
+     *
+     * 修改人:          修改日期:
+     */
+    List<Map<String, String>> queryDict();
+
+    /**
+     * 方法功能说明：查询预约数据，供导出使用
+     *
+     * @param expTime
+     * @param quX
+     * @param anZhDi
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/9 10:46
+     *
+     * 修改人:          修改日期:
+     */
+    List<ObdMakeEntity> handleQuery(@Param("expTime") String expTime, @Param("quX") String quX,
+                                    @Param("anZhDi") String anZhDi);
 }
