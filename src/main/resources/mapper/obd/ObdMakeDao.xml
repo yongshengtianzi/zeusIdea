@@ -131,6 +131,15 @@
 
     <!--
       任务编号：
+      王锦阳 2020/11/9 21:20
+      功能说明：保存新增的车辆
+    -->
+    <insert id="insObdCar" parameterType="string">
+        INSERT INTO txbd.t_obd_car (car_num, car_jia) VALUES (#{carNum}, #{carJia})
+    </insert>
+
+    <!--
+      任务编号：
       王锦阳 2020/11/3 15:40
       功能说明：更新车辆信息
     -->
@@ -221,17 +230,18 @@
             t.cun_date AS "cunDate",
             t.cun_qux AS "cunQux",
 			t.cun_num AS "cunNum",
-			TO_CHAR(mk.num, 'FM999999999') AS "num",
-			TO_CHAR(to_number(t.cun_num, 'FM99999999') - mk.num, 'FM999999999') AS "weiNum"
-         FROM txbd.t_obd_cun t,
+			TO_CHAR(coalesce(mk.num, 0), 'FM999999999') AS "num",
+			TO_CHAR(to_number(t.cun_num, 'FM99999999') - coalesce(mk.num, 0), 'FM999999999') AS "weiNum"
+         FROM txbd.t_obd_cun t
+         LEFT JOIN
 	          (SELECT COUNT(1) as "num",
 			          tm.qu_x
 				 FROM txbd.t_obd_make tm
 				WHERE tm.del_flag = '1'
 				  AND tm.exp_time = to_date(#{nowDate}, 'YYYY-MM-DD')
 				GROUP BY tm.qu_x) mk
-         WHERE t.cun_qux = mk.qu_x
-           AND t.cun_date = to_date(#{nowDate}, 'YYYY-MM-DD')
+		 ON T.cun_qux = mk.qu_x
+         WHERE t.cun_date = to_date(#{nowDate}, 'YYYY-MM-DD')
     </select>
 
     <!--
@@ -247,6 +257,19 @@
             cd.tel as "tel"
        FROM txbd.common_dict cd
        ORDER BY cd.order_by
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/2 15:47
+      功能说明：查询系统参数
+    -->
+    <select id="querySysPara" parameterType="string" resultType="map">
+        SELECT
+            cd.default_value as "defaultValue",
+            cd.remark as "remark"
+       FROM txbd.sys_para cd
+      WHERE cd.para_code = #{paraCode}
     </select>
 
 </mapper>

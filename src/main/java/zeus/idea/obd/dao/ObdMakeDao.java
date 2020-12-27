@@ -64,6 +64,19 @@ public interface ObdMakeDao {
     void updCarInfo(@Param("oce") ObdCarEntity oce);
 
     /**
+     * 方法功能说明：保存新增的车辆
+     *
+     * @param carNum
+     * @param carJia
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/9 21:21
+     *
+     * 修改人:          修改日期:
+     */
+    void insObdCar(@Param("carNum") String carNum, @Param("carJia") String carJia);
+
+    /**
      * 方法功能说明：根据车牌号查询预约信息
      *
      * @param carNum
@@ -140,4 +153,16 @@ public interface ObdMakeDao {
      */
     List<ObdMakeEntity> handleQuery(@Param("expTime") String expTime, @Param("quX") String quX,
                                     @Param("anZhDi") String anZhDi);
+
+    /**
+     * 方法功能说明：查询系统参数
+     *
+     * @param paraCode
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/12/2 15:49
+     *
+     * 修改人:          修改日期:
+     */
+    List<Map<String, String>> querySysPara(@Param("paraCode") String paraCode);
 }

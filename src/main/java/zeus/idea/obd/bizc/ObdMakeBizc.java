@@ -77,6 +77,33 @@ public class ObdMakeBizc {
     }
 
     /**
+     * 方法功能说明：查询车辆信息，如果不存在则新增，调整后的需求
+     *
+     * @param carNum
+     * @param carJia
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/11/9 21:26
+     *
+     * 修改人:          修改日期:
+     */
+    @Transactional(readOnly = false)
+    public synchronized List<ObdCarEntity> queryInsObdCar(String carNum, String carJia) {
+        List<ObdCarEntity> tempList = obdMakeDao.queryObdCar(carNum, null, null);
+        if (tempList != null && tempList.size() > 0) {
+            return tempList;
+        } else {
+            obdMakeDao.insObdCar(carNum, carJia);
+            ObdCarEntity entity = new ObdCarEntity();
+            entity.setCarNum(carNum);
+            entity.setCarJia(carJia);
+            tempList = new ArrayList<>();
+            tempList.add(entity);
+        }
+        return tempList;
+    }
+
+    /**
      * 方法功能说明：保存预约信息
      *
      * @param ome
@@ -323,6 +350,20 @@ public class ObdMakeBizc {
      */
     public List<ObdMakeEntity> handleQuery(String expTime, String quX, String anZhDi) {
         return obdMakeDao.queryMakeInfo(null, quX, expTime, anZhDi);
+    }
+
+    /**
+     * 方法功能说明：查询系统参数
+     *
+     * @param paraCode
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/12/2 15:50
+     *
+     * 修改人:          修改日期:
+     */
+    public List<Map<String, String>> querySysPara(String paraCode) {
+        return obdMakeDao.querySysPara(paraCode);
     }
 
 }

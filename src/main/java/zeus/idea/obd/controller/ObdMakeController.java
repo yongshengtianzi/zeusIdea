@@ -63,6 +63,16 @@ public class ObdMakeController {
         String code = "1";
         String msg = "";
 
+        List<Map<String, String>> tempMapList = obdMakeBizc.querySysPara("obdStart");
+
+        if (tempMapList != null && !tempMapList.isEmpty()) {
+            if ("0".equals(tempMapList.get(0).get("defaultValue"))) {
+                retMap.put("code", "2");
+                retMap.put("msg", tempMapList.get(0).get("remark"));
+                return retMap;
+            }
+        }
+
         LocalDateTime nowTime = LocalDateTime.now();
         int tempHour = nowTime.getHour();
         if (tempHour < 7 || tempHour >= 20) {
@@ -95,7 +105,7 @@ public class ObdMakeController {
 
         if ("1".equals(code)) {
             try {
-                List<ObdCarEntity> data = obdMakeBizc.queryObdCar(carNum, carPeople, carJia);
+                List<ObdCarEntity> data = obdMakeBizc.queryInsObdCar(carNum, carJia);
                 if (data == null || data.size() == 0) {
                     code = "3";
                     msg = "未查到车辆信息，请去区县环保局登记！";
@@ -630,6 +640,50 @@ public class ObdMakeController {
                 logger.error("查询预约信息异常：" + e.getMessage());
                 code = "0";
                 msg = "查询预约信息异常！";
+            }
+        }
+
+        retMap.put("code", code);
+        retMap.put("msg", msg);
+        return retMap;
+    }
+
+    /**
+     * 方法功能说明：查询系统参数
+     *
+     * @param paramsMap
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2020/12/2 15:54
+     *
+     * 修改人:          修改日期:
+     */
+    @RequestMapping(value = "querysyspara")
+    @ResponseBody
+    public Map<String, Object> querySysPara(@RequestBody Map<String, String> paramsMap) {
+        Map<String, Object> retMap = new HashMap<>();
+        String code = "1";
+        String msg = "";
+
+        String paraStr = paramsMap.get("paraStr");
+
+        if ("1".equals(code)) {
+            try {
+                if (StringUtils.isNotBlank(paraStr)) {
+                    List<Map<String, String>> mapList;
+                    String[] strs = paraStr.split(",");
+                    for (String for_str : strs) {
+                        mapList = obdMakeBizc.querySysPara(for_str);
+                        if (mapList != null || !mapList.isEmpty()) {
+                            retMap.put(for_str, mapList.get(0));
+                        }
+                    }
+                }
+                msg = "查询成功";
+            } catch (Exception e) {
+                logger.error("查询系统参数异常：" + e.getMessage());
+                code = "0";
+                msg = "查询系统参数异常！";
             }
         }
 
