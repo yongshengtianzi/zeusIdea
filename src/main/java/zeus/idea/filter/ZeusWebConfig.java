@@ -23,8 +23,11 @@ import org.springframework.core.io.ClassPathResource;
 import zeus.idea.filter.bizc.PermissionEnableBizc;
 import zeus.idea.filter.entity.PermissionEnableEntity;
 import zeus.idea.filter.entrance.LoginFilter;
+import zeus.idea.filter.shiro.ShiroLoginFilter;
+import zeus.idea.filter.shiro.ZeusAuthorizationFilter;
 import zeus.idea.filter.shiro.ZeusShiroRealm;
 
+import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,12 +104,17 @@ public class ZeusWebConfig {
         ShiroFilterFactoryBean sffb = new ShiroFilterFactoryBean();
         sffb.setSecurityManager(sm);//配置SecurityManager对象，必须要有
 
+        Map<String, Filter> filters = new LinkedHashMap<String, Filter>();
+        filters.put("zeusUser", new ShiroLoginFilter());
+        filters.put("zeusOr", new ZeusAuthorizationFilter());
+        sffb.setFilters(filters);
+
         /**
          * 配置登录、登陆成功、未授权的跳转界面
          */
-        sffb.setLoginUrl("/zeus/filter/login");//设置登录提醒url
-        sffb.setSuccessUrl("/zeus/filter/success");//设置登录成功跳转url
-        sffb.setUnauthorizedUrl("/zeus/filter/notperm");//设置未授权跳转url
+//        sffb.setLoginUrl("/zeus/filter/login");//设置登录提醒url
+//        sffb.setSuccessUrl("/zeus/filter/success");//设置登录成功跳转url
+//        sffb.setUnauthorizedUrl("/zeus/filter/notperm");//设置未授权跳转url
 
         /**
          * 配置拦截器
@@ -118,6 +126,7 @@ public class ZeusWebConfig {
         filterChainDefinitionMap.put("/zeus/user/loginOut", "anon");
         filterChainDefinitionMap.put("/zeus/filter/userLogin", "anon");//配置用户登录为例外
         filterChainDefinitionMap.put("/zeus/filter/login", "anon");//配置用户登录提醒为例外
+        filterChainDefinitionMap.put("/zeus/filter/loginOut", "anon");//配置用户为例外
         filterChainDefinitionMap.put("/user/usersjmanage", "anon");//手机端，配置用户登录提醒为例外
         filterChainDefinitionMap.put("/obd/make/**", "anon");//配置用户登录提醒为例外
         filterChainDefinitionMap.put("/zeus/filter/notperm", "authc");//配置用户权限不足提醒
@@ -130,7 +139,7 @@ public class ZeusWebConfig {
         filterChainDefinitionMap.put("/static/**", "anon");
         filterChainDefinitionMap.put("/file_temp/**", "anon");
         //配置监听
-        filterChainDefinitionMap.put("/zeus/dbhandle/init", "authc,roles[adminRole]");
+        filterChainDefinitionMap.put("/zeus/dbhandle/init", "zeusUser,zeusOr[1]");
 
         //从数据库获取url及其归属权限
         List<PermissionEnableEntity> permList = permissionEnableBizc.queryPermRelation();
@@ -141,10 +150,10 @@ public class ZeusWebConfig {
             }
             String relationType = for_perm.getRelationType();//关系类型，role角色、perms权限等
             String enName = for_perm.getEnName();//角色名称或权限值
-            filterChainDefinitionMap.put(urlHref, "roles[" + enName + "]");
+            filterChainDefinitionMap.put(urlHref, "zeusUser,zeusOr[" + enName + "]");
         }
 
-        filterChainDefinitionMap.put("/**", "authc,roles[adminRole]");
+        filterChainDefinitionMap.put("/**", "zeusUser,zeusOr[1]");
 
         sffb.setFilterChainDefinitionMap(filterChainDefinitionMap);
 

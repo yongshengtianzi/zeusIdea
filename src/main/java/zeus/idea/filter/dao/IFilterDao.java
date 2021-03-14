@@ -30,4 +30,20 @@ public interface IFilterDao {
      * @param ue
      */
     public void saveLoginRecord(@Param("ue") UserEntity ue);
+
+    /**
+     * 方法功能说明：更新用户登录记录
+     *
+     * @param loginOutType
+     * @param loginOutUser
+     * @param token
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2021/3/14 22:56
+     *
+     * 修改人:          修改日期:
+     */
+    void updLoginRecord(@Param("loginOutType") String loginOutType,
+                        @Param("loginOutUser") String loginOutUser,
+                        @Param("token") String token);
 }

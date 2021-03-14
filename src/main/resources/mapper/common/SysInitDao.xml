@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.common.dao.SysInitDao">
+
+    <sql id="pcodeColumns">
+    </sql>
+
+    <!--
+      任务编号：
+      王锦阳 2021/2/21 20:56
+      功能说明：查询笔记关键字信息
+    -->
+    <select id="queryNoteKey" resultType="map">
+        SELECT T.node_key_name AS "key", TO_CHAR(T.node_key_id, 'FM9999999999999999999999999999999999999999999999999999999999999999') AS "value" FROM MG.t_node_key T
+    </select>
+
+</mapper>

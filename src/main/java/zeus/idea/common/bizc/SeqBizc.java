@@ -39,4 +39,33 @@ public class SeqBizc {
     public String getUserSEQ() {
         return iSeqDao.getUserSEQ();
     }
+
+    /**
+     * 方法功能说明：获取笔记关键字序列
+     *
+     * @param
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2021/1/7 22:28
+     *
+     * 修改人:          修改日期:
+     */
+    public String getKeySEQ() {
+        return iSeqDao.getKeySEQ();
+    }
+
+    /**
+     * 方法功能说明：获取笔记的主键
+     *
+     * @param
+     * @return
+     *
+     * 作者:jinyang.wang     创建日期:2021/1/9 20:52
+     *
+     * 修改人:          修改日期:
+     */
+    public String getNoteSEQ() {
+        return iSeqDao.getNoteSEQ();
+    }
+
 }

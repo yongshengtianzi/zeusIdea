@@ -34,4 +34,18 @@
             #{ue.token})
     </insert>
 
+    <!--
+      任务编号：
+      王锦阳 2021/3/14 22:54
+      功能说明：更新用户登录记录
+    -->
+    <update id="updLoginRecord" parameterType="string">
+        UPDATE z_zeus.user_login_record
+           SET login_out_time = NOW(),
+               update_time = NOW(),
+               login_out_type = #{loginOutType},
+               login_out_user = #{loginOutUser}
+         WHERE token = #{token}
+    </update>
+
 </mapper>

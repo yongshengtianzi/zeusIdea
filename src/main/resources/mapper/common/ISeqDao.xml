@@ -14,4 +14,22 @@
         SELECT nextval('z_zeus.seq_user_data'::regclass) AS seq
     </select>
 
+    <!--
+      任务编号：
+      王锦阳 2021/1/7 22:26
+      功能说明：获取笔记关键字序列
+    -->
+    <select id="getKeySEQ" resultType="String" useCache="false" flushCache="true">
+        SELECT nextval('mg.seq_mg_key'::regclass) AS seq
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2021/1/9 20:51
+      功能说明：获取笔记的主键
+    -->
+    <select id="getNoteSEQ" resultType="String">
+        SELECT nextval('mg.seq_mg_note'::regclass) AS seq
+    </select>
+
 </mapper>

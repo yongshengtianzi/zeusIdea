@@ -89,7 +89,7 @@ public class FilterController {
     @ResponseBody
     public Map<String, Object> userLogin(@RequestBody Map<String, String> paramsMap,
                                          HttpServletRequest request, HttpServletResponse response) {
-        Map<String, Object> resultMap = resultMap = new HashMap<String,Object>();
+        Map<String, Object> resultMap = new HashMap<String,Object>();
         String code = "1";
         String msg = "";
 
@@ -113,6 +113,7 @@ public class FilterController {
                 //查询该登录用户角色数据，从shiro获取
 
                 msg = "成功";
+                resultMap.put("coolName", fue.getCoolName());
             } catch (LockedAccountException e) {
                 code = "qx02";
                 msg = "账号被锁定";
@@ -144,6 +145,20 @@ public class FilterController {
         String code = "1";
         String msg = "";
 
+        try {
+            Subject subject = SecurityUtils.getSubject();
+            FilterUserEntity fue = (FilterUserEntity) subject.getPrincipal();
+            if (fue != null) {
+                String tokenStr = (String) subject.getSession().getId();
+                subject.logout();
+                filterBizc.loginOut("01", fue.getUserNo(), tokenStr);
+            }
+            msg = "退出登录成功!";
+        } catch (Exception e) {
+            logger.error("退出登录异常：" + e.getMessage());
+            code = "0";
+            msg = "退出登录异常！";
+        }
 
         resultMap.put("code", code);
         resultMap.put("msg", msg);

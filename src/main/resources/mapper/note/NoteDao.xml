@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="zeus.idea.note.dao.NoteDao">
+
+    <sql id="expBaseColumns">
+    </sql>
+    <sql id="expBaseJoins">
+    </sql>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/27 18:42
+      功能说明：查询笔记信息
+    -->
+    <select id="findList" parameterType="zeus.idea.note.entity.SelectEntity" resultType="zeus.idea.note.entity.NoteEntity">
+        SELECT TO_CHAR(t.node_info_id, 'FM9999999999999999999999999999999999999999999999') as "nodeInfoId",
+               TO_CHAR(t.node_info_no, 'FM9999999999999999999999999999999999999999999999') as "nodeInfoNo",
+               t.node_info_title as "nodeInfoTitle",
+               t.node_info_key as "nodeInfoKeys",
+               t.node_info_content as "nodeInfoContent",
+               t.node_info_url as "nodeInfoUrl",
+               t.node_info_remark as "nodeInfoRemark",
+               TO_CHAR(t.create_date, 'YYYY-MM-DD HH24:MI:SS') as "createDate",
+               TO_CHAR(t.create_user_id, 'FM9999999999999999999999999999') as "createUserId",
+               t.create_user_no as "createUserNo",
+               TO_CHAR(t.update_date, 'YYYY-MM-DD HH24:MI:SS') as "updateDate",
+               TO_CHAR(t.update_user_id, 'FM9999999999999999999999999999') as "updateUserId",
+               t.update_user_no as "updateUserNo"
+          FROM MG.t_node_info t
+         <where>
+             <if test="se.nodeInfoNo != null and se.nodeInfoNo != ''">
+                 AND t.node_info_no LIKE '%' || #{se.nodeInfoNo} || '%'
+             </if>
+             <if test="se.nodeInfoTitle != null and se.nodeInfoTitle != ''">
+                 AND t.node_info_title LIKE '%' || #{se.nodeInfoTitle} || '%'
+             </if>
+             <if test="se.nodeInfoKey != null and se.nodeInfoKey.size() &gt; 0">
+                 AND EXISTS(SELECT 1 FROM MG.t_node_key_relation TKR
+                             WHERE EXISTS(SELECT 1 FROM MG.t_node_key TNK
+                                           WHERE TNK.node_key_id = TKR.node_key_id
+                                             AND TNK.node_key_name IN (
+                 <foreach collection="se.nodeInfoKey" item="val" index="indexList" separator=",">
+                     #{val}
+                 </foreach>
+                 ))
+                               AND t.node_info_id = TKR.node_info_id)
+             </if>
+             <if test="se.url != null and se.url != ''">
+                 AND t.node_info_url LIKE '%' || #{se.url} || '%'
+             </if>
+             <if test="se.createUserId != null and se.createUserId != ''">
+                 AND t.create_user_id = TO_NUMBER(#{se.createUserId}, 'FM99999999999')
+             </if>
+         </where>
+        ORDER BY t.node_info_no DESC
+        LIMIT ${se.tablePageSize} offset (${se.curPage} - 1) * ${se.tablePageSize}
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/27 18:46
+      功能说明：查询笔记总数
+    -->
+    <select id="findListCount" parameterType="zeus.idea.note.entity.SelectEntity" resultType="java.lang.Integer">
+        SELECT
+               COUNT(1)
+          FROM MG.t_node_info t
+        <where>
+            <if test="se.nodeInfoNo != null and se.nodeInfoNo != ''">
+                AND t.node_info_no LIKE '%' || #{se.nodeInfoNo} || '%'
+            </if>
+            <if test="se.nodeInfoTitle != null and se.nodeInfoTitle != ''">
+                AND t.node_info_title LIKE '%' || #{se.nodeInfoTitle} || '%'
+            </if>
+            <if test="se.nodeInfoKey != null and se.nodeInfoKey.size() &gt; 0">
+                AND EXISTS(SELECT 1 FROM MG.t_node_key_relation TKR
+                WHERE EXISTS(SELECT 1 FROM MG.t_node_key TNK
+                WHERE TNK.node_key_id = TKR.node_key_id
+                AND TNK.node_key_name IN (
+                <foreach collection="se.nodeInfoKey" item="val" index="indexList" separator=",">
+                    #{val}
+                </foreach>
+                ))
+                AND t.node_info_id = TKR.node_info_id)
+            </if>
+            <if test="se.url != null and se.url != ''">
+                AND t.node_info_url LIKE '%' || #{se.url} || '%'
+            </if>
+            <if test="se.createUserId != null and se.createUserId != ''">
+                AND t.create_user_id = TO_NUMBER(#{se.createUserId}, 'FM99999999999')
+            </if>
+        </where>
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/28 20:10
+      功能说明：根据关键字查询关键字信息
+    -->
+    <select id="queryNodeKey" parameterType="string" resultType="zeus.idea.note.entity.NoteKeyEntity">
+        SELECT node_key_id AS "nodeKeyId",
+               node_key_name AS "nodeKeyName",
+               create_date AS "createDate",
+               create_user_id AS "createUserId",
+               create_user_no AS "createUserNo",
+               update_date AS "updateDate",
+               update_user_id AS "updateUserId",
+               update_user_no AS "updateUserNo"
+          FROM MG.t_node_key T
+         WHERE T.node_key_name = #{nodeKeyName}
+    </select>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/27 19:01
+      功能说明：保存笔记信息
+    -->
+    <insert id="saveNote" parameterType="zeus.idea.note.entity.NoteEntity">
+        INSERT INTO MG.t_node_info(
+            node_info_id,
+            node_info_no,
+            node_info_title,
+            node_info_key,
+            node_info_content,
+            node_info_url,
+            node_info_remark,
+            create_date,
+            create_user_id,
+            create_user_no,
+            update_date,
+            update_user_id,
+            update_user_no
+        ) VALUES (
+            TO_NUMBER(#{se.nodeInfoId}, 'FM9999999999999999999999999999999999999999999999'),
+            TO_NUMBER(#{se.nodeInfoNo}, 'FM9999999999999999999999999999999999999999999999'),
+            #{se.nodeInfoTitle},
+            #{se.nodeInfoKeys},
+            #{se.nodeInfoContent},
+            #{se.nodeInfoUrl},
+            #{se.nodeInfoRemark},
+            NOW(),
+            TO_NUMBER(#{se.createUserId}, 'FM9999999999999999999999999999'),
+            #{se.createUserNo},
+            NOW(),
+            TO_NUMBER(#{se.updateUserId}, 'FM9999999999999999999999999999'),
+            #{se.updateUserNo}
+        )
+    </insert>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/30 17:57
+      功能说明：保存关键字数据
+    -->
+    <insert id="saveNoteKey" parameterType="zeus.idea.note.entity.NoteKeyEntity">
+        INSERT INTO MG.t_node_key(
+                node_key_id,
+                node_key_name,
+                create_date,
+                create_user_id,
+                create_user_no,
+                update_date,
+                update_user_id,
+                update_user_no
+        ) VALUES (
+                TO_NUMBER(#{ke.nodeKeyId}, 'FM99999999999999999999999999999999999999999999999'),
+                #{ke.nodeKeyName},
+                NOW(),
+                TO_NUMBER(#{ke.createUserId}, 'FM99999999999999999999999999999999999999999999999'),
+                #{ke.createUserNo},
+                NOW(),
+                TO_NUMBER(#{ke.updateUserId}, 'FM99999999999999999999999999999999999999999999999'),
+                #{ke.updateUserNo}
+        )
+    </insert>
+
+    <!--
+      任务编号：
+      王锦阳 2020/12/30 19:00
+      功能说明：保存笔记与关键字关系
+    -->
+    <insert id="saveNoteKeyRe" parameterType="list">
+        INSERT INTO MG.t_node_key_relation(
+                node_key_relation_id,
+                node_key_id,
+                node_info_id,
+                create_date,
+                create_user_id,
+                create_user_no,
+                update_date,
+                update_user_id,
+                update_user_no
+        ) VALUES
+        <foreach collection="datas" item="mapData" index="indexList" separator=",">
+            (
+            TO_NUMBER(#{mapData.nodeKeyRelationId}, 'FM99999999999999999999999999999999999999999999999'),
+            TO_NUMBER(#{mapData.nodeKeyId}, 'FM99999999999999999999999999999999999999999999999'),
+            TO_NUMBER(#{mapData.nodeInfoId}, 'FM99999999999999999999999999999999999999999999999'),
+            NOW(),
+            TO_NUMBER(#{mapData.createUserId}, 'FM99999999999999999999999999999999999999999999999'),
+            #{mapData.createUserNo},
+            NOW(),
+            TO_NUMBER(#{mapData.updateUserId}, 'FM99999999999999999999999999999999999999999999999'),
+            #{mapData.updateUserNo}
+            )
+        </foreach>
+    </insert>
+
+    <!--
+      任务编号：
+      王锦阳 2021/1/4 18:37
+      功能说明：删除笔记与关键字关系
+    -->
+    <delete id="delNoteKeyRe" parameterType="string">
+        DELETE FROM MG.t_node_key_relation WHERE node_info_id = TO_NUMBER(#{nodeInfoId}, 'FM999999999999999999999999999999999999999999999999999999999999999999')
+    </delete>
+
+    <!--
+      任务编号：
+      王锦阳 2021/1/9 21:14
+      功能说明：更新笔记信息
+    -->
+    <update id="updNote" parameterType="zeus.idea.note.entity.NoteEntity">
+        UPDATE MG.t_node_info
+           SET node_info_title = #{se.nodeInfoTitle},
+               node_info_key = #{se.nodeInfoKeys},
+               node_info_content = #{se.nodeInfoContent},
+               node_info_url = #{se.nodeInfoUrl},
+               node_info_remark = #{se.nodeInfoRemark},
+               update_date = NOW(),
+               update_user_id = TO_NUMBER(#{se.updateUserId}, 'FM9999999999999999999999999999'),
+               update_user_no = #{se.updateUserNo}
+         WHERE node_info_id = TO_NUMBER(#{se.nodeInfoId}, 'FM9999999999999999999999999999999999999999999999')
+    </update>
+
+    <!--
+      任务编号：
+      王锦阳 2021/1/9 21:32
+      功能说明：删除笔记信息
+    -->
+    <delete id="delNote" parameterType="string">
+        DELETE FROM MG.t_node_info WHERE node_info_id = TO_NUMBER(#{nodeInfoId}, 'FM999999999999999999999999999999999999999999999999999999999999999999')
+    </delete>
+
+</mapper>

@@ -63,14 +63,11 @@ public class FilterBizc {
     }
 
     /**
-     * 退出登录
+     * 保存登录信息
      * @return
      */
-    public Map<String, String> loginOut() {
-        Map<String, String> retMap = new HashMap<>();
-        String code = "1";
-        String msg = "";
-
-        return retMap;
+    @Transactional(readOnly = false)
+    public void loginOut(String loginOutType, String loginOutUser, String token) {
+        iFilterDao.updLoginRecord(loginOutType, loginOutUser, token);
     }
 }
